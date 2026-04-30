@@ -1,0 +1,19 @@
+node_modules/
+.next/
+out/
+dist/
+*.log
+.DS_Store
+*.tsbuildinfo
+
+# Local env (NEVER commit)
+.env
+.env.local
+.env.*.local
+
+# SQLite database — bank data, never commit
+data/
+*.db
+*.db-journal
+*.sqlite
+*.sqlite-journal
