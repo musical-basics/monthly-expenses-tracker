@@ -21,7 +21,11 @@ export default async function Page({
   const grouped = {
     review: subs.filter((s) => s.status === "review"),
     needs_cancellation: subs.filter((s) => s.status === "needs_cancellation"),
-    active: subs.filter((s) => s.status === "active"),
+    active: subs
+      .filter((s) => s.status === "active")
+      .sort((a, b) =>
+        a.merchant_display.localeCompare(b.merchant_display, "en", { sensitivity: "base" }),
+      ),
     canceled: subs.filter((s) => s.status === "canceled"),
     other: subs.filter(
       (s) => !["review", "needs_cancellation", "active", "canceled"].includes(s.status),
