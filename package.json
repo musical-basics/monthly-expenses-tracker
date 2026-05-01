@@ -10,7 +10,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "sync": "tsx scripts/sync.ts",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "renormalize": "tsx scripts/renormalize.ts"
   },
   "dependencies": {
     "better-sqlite3": "^11.3.0",
