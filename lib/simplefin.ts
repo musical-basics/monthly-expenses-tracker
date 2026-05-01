@@ -94,6 +94,15 @@ export async function getAccessUrl(): Promise<string> {
   return accessUrl;
 }
 
+/**
+ * Scrub any access URL (with embedded creds) out of an arbitrary string.
+ * Matches https://anything:anything@host... — undici's fetch error messages
+ * include the raw URL, so we must filter before logging/returning.
+ */
+export function scrubCredsFromError(s: string): string {
+  return s.replace(/https?:\/\/[^@\s/]+:[^@\s/]+@[^\s"']+/gi, "<simplefin-url-redacted>");
+}
+
 export async function fetchAccounts(opts: {
   startDate?: Date;
   endDate?: Date;
@@ -101,7 +110,14 @@ export async function fetchAccounts(opts: {
 } = {}): Promise<SimpleFinResponse> {
   const accessUrl = await getAccessUrl();
   const u = new URL(accessUrl);
-  // SimpleFIN returns transactions on the /accounts endpoint
+
+  // undici's fetch() refuses URLs with embedded credentials — pull them out
+  // and send as HTTP Basic auth header instead.
+  const username = decodeURIComponent(u.username);
+  const password = decodeURIComponent(u.password);
+  u.username = "";
+  u.password = "";
+
   if (!u.pathname.endsWith("/accounts")) {
     u.pathname = u.pathname.replace(/\/$/, "") + "/accounts";
   }
@@ -113,9 +129,21 @@ export async function fetchAccounts(opts: {
   }
   if (opts.pending) u.searchParams.set("pending", "1");
 
-  const res = await fetch(u.toString());
+  const headers: HeadersInit = {};
+  if (username || password) {
+    const basic = Buffer.from(`${username}:${password}`).toString("base64");
+    headers["Authorization"] = `Basic ${basic}`;
+  }
+
+  let res: Response;
+  try {
+    res = await fetch(u.toString(), { headers });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new Error(`SimpleFIN fetch failed: ${scrubCredsFromError(message)}`);
+  }
   if (!res.ok) {
-    // Do NOT include URL (contains creds) in error.
+    // Never include URL (contains creds) in error.
     throw new Error(`SimpleFIN fetch failed: ${res.status} ${res.statusText}`);
   }
   const data = (await res.json()) as SimpleFinResponse;

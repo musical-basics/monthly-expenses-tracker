@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { getDb } from "./db";
-import { fetchAccounts } from "./simplefin";
+import { fetchAccounts, scrubCredsFromError } from "./simplefin";
 import { normalizeMerchant, parseAmountToCents } from "./merchant";
 import { detectSubscriptions } from "./detect";
 
@@ -143,8 +143,10 @@ export async function runSync(opts: { lookbackDays?: number } = {}): Promise<Syn
        transactions_added = ?, subscriptions_detected = ? WHERE id = ?`,
     ).run(Date.now(), result.transactionsAdded, result.subscriptionsDetected, logId);
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    // NEVER include URLs/secrets in the error log
+    const raw = err instanceof Error ? err.message : String(err);
+    // NEVER include URLs/secrets — scrub embedded basic-auth URLs before
+    // storing or returning the error.
+    const message = scrubCredsFromError(raw);
     result.errors.push(message);
     db.prepare(
       `UPDATE sync_log SET finished_at = ?, status = 'error', error_message = ? WHERE id = ?`,
