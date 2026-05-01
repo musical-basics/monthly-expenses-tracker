@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { updateSubscriptionAction } from "../actions";
 import type { Subscription } from "@/lib/queries";
 import { fmtCents, fmtDate, fmtRelative } from "@/lib/format";
+import TransactionsDrawer from "./TransactionsDrawer";
 
 const STATUS_OPTIONS = [
   "active",
@@ -33,6 +34,7 @@ const CONF_STYLES: Record<string, string> = {
 
 export default function SubscriptionRow({ sub }: { sub: Subscription }) {
   const [open, setOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [status, setStatus] = useState(sub.status);
   const [notes, setNotes] = useState(sub.notes || "");
   const [priority, setPriority] = useState(sub.priority || "");
@@ -98,8 +100,27 @@ export default function SubscriptionRow({ sub }: { sub: Subscription }) {
             {sub.status}
           </span>
         </td>
-        <td className="px-4 py-3 text-neutral-400 max-w-xs truncate" title={sub.notes || ""}>
-          {sub.notes || (sub.charge_count ? `${sub.charge_count} charges` : "—")}
+        <td className="px-4 py-3 text-neutral-400 max-w-xs">
+          <div className="truncate" title={sub.notes || ""}>
+            {sub.notes || (
+              <button
+                onClick={() => setDrawerOpen(true)}
+                className="text-neutral-400 hover:text-neutral-100 underline decoration-dotted underline-offset-2"
+              >
+                {sub.charge_count
+                  ? `${sub.charge_count} ${sub.charge_count === 1 ? "charge" : "charges"}`
+                  : "—"}
+              </button>
+            )}
+          </div>
+          {sub.notes && sub.charge_count > 0 && (
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="text-xs text-neutral-600 hover:text-neutral-300 underline decoration-dotted underline-offset-2 mt-0.5"
+            >
+              {sub.charge_count} {sub.charge_count === 1 ? "charge" : "charges"}
+            </button>
+          )}
         </td>
         <td className="px-4 py-3 text-right">
           <button
@@ -190,6 +211,9 @@ export default function SubscriptionRow({ sub }: { sub: Subscription }) {
             </div>
           </td>
         </tr>
+      )}
+      {drawerOpen && (
+        <TransactionsDrawer sub={sub} onClose={() => setDrawerOpen(false)} />
       )}
     </>
   );
