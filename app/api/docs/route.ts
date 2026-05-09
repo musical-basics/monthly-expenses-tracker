@@ -75,6 +75,30 @@ const DOCS = {
       returns: "{ count, subscriptions[] }",
     },
     {
+      method: "GET",
+      path: "/api/agent/daily-report",
+      summary:
+        "Commander daily expense digest for one ET date. Persists generated reports separately from delivery status.",
+      query: {
+        date: "YYYY-MM-DD, optional, defaults to today in America/New_York",
+        persist: "false to preview without recording generation, optional",
+      },
+      returns:
+        "{ report: { date, transaction_count, total_debits_cents, total_credits_cents, attention_count, items[], delivery }, undelivered[] }",
+    },
+    {
+      method: "POST",
+      path: "/api/agent/daily-report",
+      summary: "Mark a generated daily report as delivered after Commander successfully sends it.",
+      body: {
+        action: "mark_delivered",
+        date: "YYYY-MM-DD, optional, defaults to today in America/New_York",
+        channel: "delivery channel label, optional",
+        notes: "delivery note, optional",
+      },
+      returns: "{ ok, delivery }",
+    },
+    {
       method: "POST",
       path: "/api/seed",
       summary:
