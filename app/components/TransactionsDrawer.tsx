@@ -8,6 +8,7 @@ import { fmtCents, fmtDate } from "@/lib/format";
 type Txn = {
   id: string;
   account_id: string;
+  account_name: string | null;
   posted_at: number;
   amount_cents: number;
   description: string | null;
@@ -112,6 +113,7 @@ export default function TransactionsDrawer({
                     <th className="text-left py-2 font-medium">Date</th>
                     <th className="text-right py-2 font-medium">Amount</th>
                     <th className="text-left py-2 font-medium pl-3">Description</th>
+                    <th className="text-left py-2 font-medium pl-3">Account</th>
                     <th className="text-left py-2 font-medium pl-3">Status</th>
                   </tr>
                 </thead>
@@ -133,6 +135,12 @@ export default function TransactionsDrawer({
                         </td>
                         <td className="py-2 pl-3 text-neutral-400 truncate max-w-[16rem]">
                           {t.payee || t.description || t.memo || "—"}
+                        </td>
+                        <td
+                          className="py-2 pl-3 text-neutral-500 text-xs truncate max-w-[10rem]"
+                          title={t.account_name ?? t.account_id}
+                        >
+                          {t.account_name ?? t.account_id}
                         </td>
                         <td className="py-2 pl-3">
                           {t.pending ? (

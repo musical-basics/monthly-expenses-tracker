@@ -90,6 +90,22 @@ function migrate(db: Database.Database) {
       value TEXT
     );
   `);
+
+  // Columns added after the initial schema. User-set, so detection never touches them.
+  addColumnIfMissing(db, "subscriptions", "check_up", "INTEGER NOT NULL DEFAULT 0");
+  addColumnIfMissing(db, "subscriptions", "canceled_at", "INTEGER");
+}
+
+function addColumnIfMissing(
+  db: Database.Database,
+  table: string,
+  column: string,
+  definition: string,
+) {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+  if (!cols.some((c) => c.name === column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
 }
 
 export function metaGet(key: string): string | null {

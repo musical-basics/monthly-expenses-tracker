@@ -58,6 +58,12 @@ export default async function Page({
           </p>
         </div>
         <div className="flex gap-2">
+          <a
+            href="/review"
+            className="border border-neutral-700 px-4 py-2 rounded text-sm hover:bg-neutral-800 h-fit"
+          >
+            Review dashboard
+          </a>
           <SeedButton />
           <SyncButton />
         </div>

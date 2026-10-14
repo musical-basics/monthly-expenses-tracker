@@ -12,7 +12,8 @@ A SimpleFIN-powered subscriptions tracker for **Lionel** and **Commander** (Lion
 2. **Import transactions** — pulls the last N days (default 180) on each sync. Deduplicates by SimpleFIN transaction id, or a stable hash if missing.
 3. **Detect subscriptions** — groups transactions by normalized merchant, computes median interval, classifies cadence (weekly / monthly / quarterly / annual / irregular), assigns confidence (high / medium / low), and flags price increases.
 4. **Track + edit** — UI table grouped by status, with inline edit for status, priority, notes, and cancellation progress.
-5. **Commander API** — bearer-protected JSON endpoints for list, review, upcoming, and update.
+5. **Review dashboard** (`/review`) — every subscription with the account/card it's charged to, one-click **Canceled** and **Check up** toggles, filters by account, and a warning when something you marked canceled gets charged again.
+6. **Commander API** — bearer-protected JSON endpoints for list, review, upcoming, and update.
 
 ---
 

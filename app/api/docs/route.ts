@@ -37,12 +37,13 @@ const DOCS = {
         status: "filter by status (optional)",
         include_hidden: "true to include hidden (optional)",
       },
-      returns: "{ count, last_sync, subscriptions[] }",
+      returns:
+        "{ count, last_sync, subscriptions[] } — each subscription includes accounts[] (bank accounts/cards it was charged to, most recent first).",
     },
     {
       method: "GET",
       path: "/api/subscriptions/:id",
-      summary: "Get one subscription plus its recent transactions.",
+      summary: "Get one subscription plus its recent transactions (each with account_name).",
       returns: "{ subscription, transactions[] }",
     },
     {
@@ -57,7 +58,11 @@ const DOCS = {
         notes: "string | null (optional)",
         cancellation_progress: "string | null (optional)",
         merchant_display: "string (optional, override the auto-detected name)",
+        check_up:
+          "boolean (optional). Flag to double-check later, e.g. confirm a cancellation went through. Independent of status.",
       },
+      notes:
+        "Setting status to 'canceled' stamps canceled_at (kept if it was already canceled); any other status clears it.",
       returns: "{ subscription }",
     },
     {
@@ -71,8 +76,8 @@ const DOCS = {
       method: "GET",
       path: "/api/subscriptions/review",
       summary:
-        "Subscriptions needing attention: status=review|needs_cancellation|unknown, or price_increase=1.",
-      returns: "{ count, subscriptions[] }",
+        "Subscriptions needing attention: status=review|needs_cancellation|unknown, price_increase=1, or check_up=1.",
+      returns: "{ count, subscriptions[] } — with accounts[] like the list endpoint",
     },
     {
       method: "GET",
@@ -118,6 +123,7 @@ const DOCS = {
     "3. GET /api/subscriptions/upcoming?window_days=7 — surface this week's renewals.",
     "4. PATCH /api/subscriptions/:id with { status: 'canceled', cancellation_progress: 'requested 2026-04-30' } when working a cancellation.",
     "5. PATCH with { status: 'hidden' } for false positives (one-time charges that look recurring).",
+    "6. For check_up=1 items: if a canceled subscription has a charge after canceled_at, tell Lionel; once he confirms it's resolved, PATCH { check_up: false }.",
   ],
   safety: [
     "Auth bearer required on every endpoint.",

@@ -150,9 +150,11 @@ Returns:
 { count, last_sync, subscriptions[] }
 ```
 
+Each subscription includes `accounts[]`: the bank accounts/cards it has been charged to, most recently charged first (`{ account_id, org_name, name, charge_count, last_charged_at }`). `accounts[0]` is the account currently paying for it. Seeded items with no charges have an empty array.
+
 ### `GET /api/subscriptions/:id`
 
-Fetches one subscription plus recent transactions for its merchant.
+Fetches one subscription plus recent transactions for its merchant. Each transaction includes `account_name`.
 
 Returns:
 
@@ -173,9 +175,14 @@ Allowed JSON body fields:
   "owner": "personal | business | unknown | null",
   "notes": "string | null",
   "cancellation_progress": "string | null",
-  "merchant_display": "string"
+  "merchant_display": "string",
+  "check_up": "boolean"
 }
 ```
+
+`check_up` flags a subscription to double-check later (for example, confirming a cancellation actually went through). It is independent of `status`, so an item can be `canceled` and `check_up: true` at the same time.
+
+Setting `status` to `canceled` stamps `canceled_at` with the current time (an existing stamp is kept if it was already canceled). Any other status clears `canceled_at`.
 
 Returns:
 
@@ -185,7 +192,7 @@ Returns:
 
 ### `GET /api/subscriptions/review`
 
-Lists subscriptions that need attention. Includes `review`, `needs_cancellation`, `unknown`, and price-increase items.
+Lists subscriptions that need attention. Includes `review`, `needs_cancellation`, `unknown`, price-increase, and `check_up` items. Includes `accounts[]` like the list endpoint.
 
 Returns:
 
@@ -256,6 +263,8 @@ Recommended meanings:
 - `canceled`: user confirms it is canceled.
 - `hidden`: false positive or intentionally ignored.
 - `unknown`: not enough information yet.
+
+The separate `check_up` flag means "double-check this one." If a `canceled` + `check_up` subscription has `last_charged_at` later than `canceled_at`, the cancellation probably didn't stick, so tell the user. Clear the flag with `{ "check_up": false }` only after the user confirms it's resolved.
 
 ## Safety Rules For Agents
 

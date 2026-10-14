@@ -9,9 +9,14 @@ import {
 import { runSync } from "@/lib/sync";
 import { applySeed } from "@/lib/seed";
 
+function revalidatePages() {
+  revalidatePath("/");
+  revalidatePath("/review");
+}
+
 export async function updateSubscriptionAction(id: number, patch: SubscriptionUpdate) {
   const updated = updateSubscription(id, patch);
-  revalidatePath("/");
+  revalidatePages();
   return updated;
 }
 
@@ -21,12 +26,12 @@ export async function getMerchantTransactionsAction(merchantKey: string) {
 
 export async function syncAction() {
   const r = await runSync();
-  revalidatePath("/");
+  revalidatePages();
   return r;
 }
 
 export async function seedAction() {
   const r = applySeed();
-  revalidatePath("/");
+  revalidatePages();
   return r;
 }

@@ -99,6 +99,11 @@ export default function SubscriptionRow({ sub }: { sub: Subscription }) {
           >
             {sub.status}
           </span>
+          {sub.check_up === 1 && (
+            <span className="ml-1 text-xs px-2 py-0.5 rounded border bg-amber-950/40 text-amber-300 border-amber-800">
+              check up
+            </span>
+          )}
         </td>
         <td className="px-4 py-3 text-neutral-400 max-w-xs">
           <div className="truncate" title={sub.notes || ""}>
